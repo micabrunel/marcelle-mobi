@@ -44,11 +44,20 @@ export default {
       marker: false,
     });
 
+    const fitToBounds = (map, markers) => {
+      const bounds = new mapboxgl.LngLatBounds();
+      markers.forEach(marker => bounds.extend(marker.center));
+      map.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 800 });
+    };
+
     geocoder.setFlyTo(false);
     geocoder.on("result", result => {
       createMarker(result);
+      fitToBounds(map, markers);
       geocoder.clear();
+
     });
+
 
     map.addControl(geocoder);
   }
