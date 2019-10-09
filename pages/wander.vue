@@ -200,7 +200,7 @@
 
       this._toggleLoader();
       axios
-        .get('http://marcelle-mobi-api.herokuapp.com/itineraries/calculate', { params })
+        .get('https://marcelle-mobi-api.herokuapp.com/itineraries/calculate', { params })
         .then(({ data }) => this._drawBestResult(data))
         .catch(error => console.log({ error }))
     }
@@ -257,7 +257,7 @@
 
     _getBikes = () => {
       axios
-        .get(`http://marcelle-mobi-api.herokuapp.com/vehicules/bike?grant_token=${grant_token}`)
+        .get(`https://marcelle-mobi-api.herokuapp.com/vehicules/bike?grant_token=${grant_token}`)
         .then(({ data }) => this._drawBikes(data))
         .catch(error => console.log({ error }))
     }
