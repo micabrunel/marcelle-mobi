@@ -78,6 +78,7 @@ export default {
 
   env: {
     CODE4MARSEILLE_API_KEY: process.env.CODE4MARSEILLE_API_KEY,
+    MAPBOX_API_KEY: process.env.MAPBOX_API_KEY
   },
   /*
    ** Build configuration
