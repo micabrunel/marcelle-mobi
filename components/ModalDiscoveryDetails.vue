@@ -7,36 +7,30 @@
       >
         <div class="modal-body">
           <h3 class="title-details">TON TRAJET</h3>
-              <div class="poi1">
-              </div>
-              <div class="info-poi1">
-
-              </div>
-              <div class="poi2">
-                <div class="info-poi2">
-
-                </div>
-              </div>
-              <div class="poi3">
-                <div class="info-poi3">
-
-                </div>
-              </div>
-              <div class="poi4">
-                <div class="info-poi4">
-
-                </div>
-              </div>
-              <div class="poi5">
-                <div class="info-poi5">
-
-                </div>
-              </div>
-              <div class="poi6">
-                <div class="info-poi6">
-
-                </div>
-              </div>
+          <div class="poi1">
+            <div class="info-poi1">
+            </div>
+          </div>
+          <div class="poi2">
+            <div class="info-poi2">
+            </div>
+          </div>
+          <div class="poi3">
+            <div class="info-poi3">
+            </div>
+          </div>
+          <div class="poi4">
+            <div class="info-poi4">
+            </div>
+          </div>
+          <div class="poi5">
+            <div class="info-poi5">
+            </div>
+          </div>
+          <div class="poi6">
+            <div class="info-poi6">
+            </div>
+          </div>
         </div>
       </div>
     </b-collapse>
@@ -79,12 +73,9 @@ export default {
 .container-details {
   display: flex;
   border-radius: 10px;
-  min-height: 60px;
-  padding-left: 20px;
-  padding-top: 10px;
+  padding: 10px 15px;
   align-items: center;
   color: white;
-
 }
 .modal-body {
   max-height: 50vh;
@@ -92,10 +83,11 @@ export default {
 }
 
 .poi-name {
-  margin-left: 10px;
+  margin: 0 10px 0;
 }
 
 .nbr-trajet {
+  margin: 0;
   width: 30px;
   height: 30px;
   font-weight: bold;
@@ -106,13 +98,36 @@ export default {
 }
 
 .details-poi {
+  position: relative;
   background-color: white;
-  height: 80px;
   width: 90%;
   border-radius: 10px;
   margin-left: 20px;
   padding: 10px;
-  overflow: auto;
+  text-align: center;
+  font-size: 14px;
+
+  .numbers {
+    color: #0086c5;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 10px;
+    height: 11px;
+    border-left: 2px solid white;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 10px;
+    height: 11px;
+    border-left: 2px solid white;
+  }
 }
 
 .trajet {
