@@ -9,15 +9,33 @@
           <h3 class="title-details">TON TRAJET</h3>
               <div class="poi1">
               </div>
+              <div class="info-poi1">
+
+              </div>
               <div class="poi2">
+                <div class="info-poi2">
+
+                </div>
               </div>
               <div class="poi3">
+                <div class="info-poi3">
+
+                </div>
               </div>
               <div class="poi4">
+                <div class="info-poi4">
+
+                </div>
               </div>
               <div class="poi5">
+                <div class="info-poi5">
+
+                </div>
               </div>
               <div class="poi6">
+                <div class="info-poi6">
+
+                </div>
               </div>
         </div>
       </div>
@@ -64,7 +82,6 @@ export default {
   min-height: 60px;
   padding-left: 20px;
   padding-top: 10px;
-  margin-bottom: 10px;
   align-items: center;
   color: white;
 
@@ -86,6 +103,16 @@ export default {
   border: 3px solid white;
   border-radius: 50%;
   text-align: center;
+}
+
+.details-poi {
+  background-color: white;
+  height: 80px;
+  width: 90%;
+  border-radius: 10px;
+  margin-left: 20px;
+  padding: 10px;
+  overflow: auto;
 }
 
 .trajet {
