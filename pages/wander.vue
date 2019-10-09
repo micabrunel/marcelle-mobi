@@ -111,7 +111,7 @@
     _addDetailsToModal = () => {
       const DetailsModal = document.querySelector(`.info-poi${this.markers.length}`);
       const trip = this.trips[this.trips.length - 1];
-      const time = Math.round(trip.duration/60);
+      const time = Math.round(trip.duration / 60);
       const mode = trip.tags[0];
       let displaymode = mode;
       if (mode == "walking") {
@@ -124,7 +124,6 @@
       trip.sections.forEach(function(element) {
         modesections.push(element);
       });
-      // console.log({modesections});
 
       // Si on est dans le cas d'un public transport
       let metronumber = "";
@@ -143,14 +142,35 @@
         regex_arrival = arrival.match(regex);
       }
 
-      const distance = (trip.distances[mode]/1000).toFixed(1);
-      // Si vélo ou trajet à pied
-      if ((displaymode == '<i class="fas fa-biking"></i>') || (displaymode == '<i class="fas fa-walking"></i>')) {
-        DetailsModal.insertAdjacentHTML('beforeend',`<div class="details-poi"> <div> ${displaymode} pendant ${time} min, sur une distance de ${distance} km </div></div>`);
+      const distance = (trip.distances[mode] / 1000).toFixed(1);
+
+      const co2Emission = `${trip.co2_emission.value} ${trip.co2_emission.unit}`;
+
+      // If biking or walking
+      if (
+        (displaymode === '<i class="fas fa-biking"></i>') ||
+        (displaymode === '<i class="fas fa-walking"></i>')
+      ) {
+        const insert =
+          `<div class="details-poi">
+            <div>${displaymode} pendant ${time} min, sur une distance de ${distance} km et 0 gEC !</div>
+          </div>`;
+
+        DetailsModal.insertAdjacentHTML('beforeend', insert);
       }
-      // Si métro
+      // If public transport
       else {
-        DetailsModal.insertAdjacentHTML('beforeend',`<div class="details-poi"> <div> ${displaymode} ${metronumber} de ${departure.replace("(Marseille)", "")} à ${arrival.replace("(Marseille)", "")} </div> <div> ${distance} km | ${time} min</div></div>`);
+        const insert =
+          `<div class="details-poi">
+            <div>
+              ${displaymode} <strong>${metronumber}</strong> ${departure.replace("(Marseille)", "")} → ${arrival.replace("(Marseille)", "")}
+            </div>
+            <div class="numbers">
+              ${distance} km | ${time} min | ${co2Emission}
+            </div>
+          </div>`;
+
+        DetailsModal.insertAdjacentHTML('beforeend', insert);
       }
     }
 
