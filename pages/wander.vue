@@ -24,7 +24,7 @@
 
   const lineColors = {
     "bike": '#020887',
-    "bss": '#19ddff',
+    "transfer": '#19ddff',
     "walking": '#19ddff',
     "public_transport": '#A4B0F5',
   };
@@ -81,6 +81,7 @@
 
       this.geocoder.setFlyTo(false);
       this.map.addControl(this.geocoder);
+      this._getBikes();
     }
 
     _handleResult = ({ result }) => {
@@ -145,10 +146,21 @@
       const options = [current, ...alternatives];
       const withoutCar = options.filter(({ tags }) => !tags.includes('car'));
 
-      const sortedOptions = withoutCar.sort((a, b) => a.duration - b.duration);
+      let sortedOptions = withoutCar.sort((a, b) => a.duration - b.duration);
+      sortedOptions = sortedOptions.filter(option => {
+        return !option.tags.includes("bike") || (option.tags.includes("bike") && option.duration < 1200)
+      })
+
+
 
       let bestOption = sortedOptions[0];
-      const walkingOption = sortedOptions.find(section => section.tags.includes("walking"));
+      // const bikeOption = sortedOptions.find(option => option.tags.includes("bike"));
+      // const ptOption = sortedOptions.find(option => option.tags.includes("walking") && option.sections.length > 1);
+      // if (bikeOption && bikeOption.duration > 1200) {
+      //   bestOption = ptOption;
+      // }
+
+      const walkingOption = sortedOptions.find(option => option.tags.includes("walking") && option.sections.length === 1);
       if (walkingOption && walkingOption.duration < 1200) {
         bestOption = walkingOption;
       }
@@ -162,13 +174,30 @@
         });
       });
 
+      console.log({bestOption});
       const filtered = sections.filter(el => el);
       filtered.forEach(section => {
+        console.log({section})
         const polyLine = layerFactory(section.coordinates, section.mode);
 
         this.map.addLayer(polyLine);
       })
 
+    }
+
+    _getBikes = () => {
+      axios
+        .get(`http://marcelle-mobi-api.herokuapp.com/vehicules/bike?grant_token=${grant_token}`)
+        .then(({ data }) => this._drawBikes(data))
+        .catch(error => console.log({ error }))
+    }
+
+    _drawBikes = (bikes) => {
+      bikes.forEach(bike => {
+        const bikeMarker = document.createElement('div');
+        bikeMarker.className = 'bike-marker';
+        new mapboxgl.Marker(bikeMarker).setLngLat([bike.position.lng, bike.position.lat]).addTo(this.map);
+      })
     }
 
     init() {
@@ -241,5 +270,12 @@
       background-color: #19ddff;
     }
 
+    .bike-marker {
+      background-image: url('../assets/images/bike.svg');
+      background-size: cover;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+    }
   }
 </style>
