@@ -131,6 +131,53 @@
       titleModal.insertAdjacentHTML('beforeend',`<div class="container-details"><p class="nbr-trajet">${this.markers.length}</p><p class="poi-name">${marker.text_fr}</p>`);
     }
 
+    _addDetailsToModal = () => {
+      const DetailsModal = document.querySelector(`.info-poi${this.markers.length}`);
+      const trip = this.trips[this.trips.length - 1];
+      const time = Math.round(trip.duration/60);
+      const mode = trip.tags[0];
+      let displaymode = mode;
+      if (mode == "walking") {
+        displaymode = '<i class="fas fa-walking"></i>';
+      }
+      if (mode == "bike") {
+        displaymode = '<i class="fas fa-biking"></i>';
+      }
+      let modesections = [];
+      trip.sections.forEach(function(element) {
+        modesections.push(element);
+      });
+      // console.log({modesections});
+
+      // Si on est dans le cas d'un public transport
+      let metronumber = "";
+      let departure = "";
+      let arrival = "";
+      let regex_departure = "";
+      let regex_arrival = "";
+      const regex = new RegExp('\b(?!Marseille)\b\S+');
+      if (modesections.length > 1) {
+        displaymode = '<i class="fas fa-bus"></i>';
+        metronumber = modesections[1]["display_informations"]["code"];
+        departure = modesections[1]["from"]["name"];
+        arrival = modesections[1]["to"]["name"];
+
+        regex_departure = departure.match(regex);
+        regex_arrival = arrival.match(regex);
+      }
+
+      const distance = (trip.distances[mode]/1000).toFixed(1);
+      // Si vélo ou trajet à pied
+      if ((displaymode == '<i class="fas fa-biking"></i>') || (displaymode == '<i class="fas fa-walking"></i>')) {
+        DetailsModal.insertAdjacentHTML('beforeend',`<div class="details-poi"> <div> ${displaymode} pendant ${time} min, sur une distance de ${distance} km </div></div>`);
+      }
+      // Si métro
+      else {
+        DetailsModal.insertAdjacentHTML('beforeend',`<div class="details-poi"> <div> ${displaymode} ${metronumber} de ${departure.replace("(Marseille)", "")} à ${arrival.replace("(Marseille)", "")} </div> <div> ${distance} km | ${time} min</div></div>`);
+      }
+    }
+
+
     _getItinary = () => {
       if (this.markers.length < 2) {
         return;
@@ -201,6 +248,9 @@
       if (walkingOption && walkingOption.duration < 1200) {
         bestOption = walkingOption;
       }
+      this.trips.push(bestOption);
+      this._addDetailsToModal();
+      console.log(this.trips);
 
       return bestOption;
     }
