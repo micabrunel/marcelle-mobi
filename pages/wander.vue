@@ -1,6 +1,13 @@
 <template>
   <div id="wander">
     <div id="map"></div>
+    <div id="legend">
+      <ul>
+        <li><div id="marker-bike"></div> Vélo</li>
+        <li><div id="marker-bus"></div> Métro/Bus</li>
+        <li><div id="marker-walking"></div> Marche</li>
+      </ul>
+    </div>
     <ModalDiscoveryDetails />
   </div>
 </template>
@@ -219,6 +226,48 @@
       width: 40px;
       height: 40px;
       cursor: pointer;
+    }
+    #legend {
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: black;
+    font-weight: 500;
+    width: 90px;
+    font-size: 10px;
+    padding: 5px;
+    height: 60px;
+    border-radius: 5px;
+    border: 1px solid #3CB3EA;
+
+    }
+    #legend li {
+      list-style-type: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #legend ul {
+      padding-left: 0px;
+    }
+
+    #marker-bike {
+      height: 5px;
+      width: 20px;
+      background-color: #020887;
+    }
+
+    #marker-bus {
+      height: 5px;
+      width: 20px;
+      background-color: #A4B0F5;
+    }
+
+    #marker-walking {
+      height: 5px;
+      width: 20px;
+      background-color: #19ddff;
     }
 
     .bike-marker {
