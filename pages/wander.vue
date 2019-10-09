@@ -167,7 +167,7 @@
 
       const distance = (trip.distances[mode] / 1000).toFixed(1);
 
-      const co2Emission = `${trip.co2_emission.value} ${trip.co2_emission.unit}`;
+      const co2Emission = `${trip.co2_emission.value.toFixed(1)} ${trip.co2_emission.unit}`;
 
       // If biking or walking
       if (
