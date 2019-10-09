@@ -1,5 +1,6 @@
 <template>
   <div id="wander">
+    <div id="map"><div id="loader" class="hidden"><div class="lds-ring"><div></div><div></div><div></div><div></div></div></div></div>
     <div id="map"></div>
     <div id="legend">
       <ul>
@@ -150,6 +151,7 @@
         mode: "walking",
       };
 
+      this._toggleLoader();
       axios
         .get('http://marcelle-mobi-api.herokuapp.com/itineraries/calculate', { params })
         .then(({ data }) => this._drawBestResult(data))
@@ -157,6 +159,10 @@
     }
 
     _drawBestResult = ({ current, alternatives }) => {
+
+      this._toggleLoader();
+      const options = [current, ...alternatives];
+      const withoutCar = options.filter(({ tags }) => !tags.includes('car'));
       const bestOption = this._computeBestOption([current, ...alternatives]);
       console.log({ bestOption });
 
@@ -236,6 +242,12 @@
       });
     }
 
+    _toggleLoader = () => {
+      const loader = document.querySelector("#loader");
+      loader.classList.toggle("hidden");
+      console.log("toggling");
+    }
+
     init() {
       this.geocoder.on("result", result => this._handleResult(result));
     }
@@ -306,6 +318,10 @@
       background-color: #19ddff;
     }
 
+    .hidden#loader {
+      display: none;
+    }
+
     .bike-marker {
       background-image: url('../assets/images/bike.svg');
       background-size: cover;
@@ -313,5 +329,53 @@
       height: 25px;
       cursor: pointer;
     }
+
+    #loader {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      position: absolute;
+    }
+    .lds-ring {
+      display: inline-block;
+      position: absolute;
+      align-items: center;
+      width: 50px;
+      height: 50px;
+      z-index: 1000;
+    }
+    .lds-ring div {
+      box-sizing: border-box;
+      display: block;
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      margin: 8px;
+      border: 8px solid #fff;
+      border-radius: 50%;
+      animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      border-color: #fff transparent transparent transparent;
+    }
+    .lds-ring div:nth-child(1) {
+      animation-delay: -0.45s;
+    }
+    .lds-ring div:nth-child(2) {
+      animation-delay: -0.3s;
+    }
+    .lds-ring div:nth-child(3) {
+      animation-delay: -0.15s;
+    }
+    @keyframes lds-ring {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
   }
 </style>

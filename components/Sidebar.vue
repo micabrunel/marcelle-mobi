@@ -53,7 +53,7 @@ export default {
           }
         },
         {
-          title: 'Découvrir',
+          title: 'Balades 💯 Carbone',
           href: '/wander',
           hiddenOnCollapse: true,
           icon: {
