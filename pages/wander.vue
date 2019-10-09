@@ -25,7 +25,7 @@
   };
 
   const polylineLayerFactory = (coordinates, tag) => {
-    const id = coordinates[0][0].toString();
+    const id = Math.random().toString();
     const lineColor = lineColors[tag];
 
     return ({
