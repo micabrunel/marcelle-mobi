@@ -1,8 +1,14 @@
 <template>
   <div id="wander">
     <div id="map"><div id="loader" class="hidden"><div class="lds-ring"><div></div><div></div><div></div><div></div></div></div></div>
-    
-
+    <div id="map"></div>
+    <div id="legend">
+      <ul>
+        <li><div id="marker-bike"></div> Vélo</li>
+        <li><div id="marker-bus"></div> Métro/Bus</li>
+        <li><div id="marker-walking"></div> Marche</li>
+      </ul>
+    </div>
     <ModalDiscoveryDetails />
   </div>
 </template>
@@ -14,6 +20,8 @@
   import 'mapbox-gl/dist/mapbox-gl.css';
   import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
   import ModalDiscoveryDetails from '~/components/ModalDiscoveryDetails'
+  import Bike from '../assets/images/bike.png';
+
   mapboxgl.accessToken = process.env.MAPBOX_API_KEY;
   const grant_token = process.env.CODE4MARSEILLE_API_KEY;
 
@@ -24,8 +32,8 @@
     "public_transport": '#A4B0F5',
   };
 
-  const layerFactory = (coordinates, tag) => {
-    const id = coordinates[0][0].toString();
+  const polylineLayerFactory = (coordinates, tag) => {
+    const id = Math.random().toString();
     const lineColor = lineColors[tag];
 
     return ({
@@ -53,6 +61,17 @@
     })
   };
 
+  const featureCollection = features => ({
+    type: "geojson",
+    data: {
+      "type": "FeatureCollection",
+      "features": features,
+    },
+    cluster: true,
+    clusterMaxZoom: 14,
+    clusterRadius: 40,
+  })
+
   class Wander {
     constructor() {
       this.markers = [];
@@ -76,7 +95,8 @@
 
       this.geocoder.setFlyTo(false);
       this.map.addControl(this.geocoder);
-      this._getBikes();
+
+      this.map.on('load', this._getBikes);
     }
 
     _handleResult = ({ result }) => {
@@ -139,47 +159,50 @@
     }
 
     _drawBestResult = ({ current, alternatives }) => {
+
       this._toggleLoader();
       const options = [current, ...alternatives];
       const withoutCar = options.filter(({ tags }) => !tags.includes('car'));
+      const bestOption = this._computeBestOption([current, ...alternatives]);
+      console.log({ bestOption });
+
+      this.trips.push(bestOption);
+      console.log('trips', this.trips);
+
+      const sections = bestOption.sections.map(section => section.geojson && ({
+        coordinates: section.geojson.coordinates,
+        mode: section.mode || section.type
+      }));
+
+
+      const filtered = sections.filter(el => el);
+      console.log('sections', filtered);
+
+      filtered.forEach(section => {
+        const polyLine = polylineLayerFactory(section.coordinates, section.mode);
+        this.map.addLayer(polyLine);
+      })
+    }
+
+    _computeBestOption(options) {
+      const withoutCar = options.filter(({ tags }) => !tags.includes('car'));
 
       let sortedOptions = withoutCar.sort((a, b) => a.duration - b.duration);
-      sortedOptions = sortedOptions.filter(option => {
-        return !option.tags.includes("bike") || (option.tags.includes("bike") && option.duration < 1200)
-      })
-
-
+      sortedOptions = sortedOptions.filter(option =>
+        !option.tags.includes("bike") || (option.tags.includes("bike") && option.duration < 1200)
+      );
 
       let bestOption = sortedOptions[0];
-      // const bikeOption = sortedOptions.find(option => option.tags.includes("bike"));
-      // const ptOption = sortedOptions.find(option => option.tags.includes("walking") && option.sections.length > 1);
-      // if (bikeOption && bikeOption.duration > 1200) {
-      //   bestOption = ptOption;
-      // }
 
-      const walkingOption = sortedOptions.find(option => option.tags.includes("walking") && option.sections.length === 1);
+      const walkingOption = sortedOptions.find(option =>
+        option.tags.includes("walking") && option.sections.length === 1
+      );
+
       if (walkingOption && walkingOption.duration < 1200) {
         bestOption = walkingOption;
       }
-      this.trips.push(bestOption);
-      console.log(this.trips);
 
-      const sections = bestOption.sections.map(section => {
-        return section.geojson && ({
-          coordinates: section.geojson.coordinates,
-          mode: section.mode || section.type
-        });
-      });
-
-      console.log({bestOption});
-      const filtered = sections.filter(el => el);
-      filtered.forEach(section => {
-        console.log({section})
-        const polyLine = layerFactory(section.coordinates, section.mode);
-
-        this.map.addLayer(polyLine);
-      })
-
+      return bestOption;
     }
 
     _getBikes = () => {
@@ -189,12 +212,34 @@
         .catch(error => console.log({ error }))
     }
 
-    _drawBikes = (bikes) => {
-      bikes.forEach(bike => {
-        const bikeMarker = document.createElement('div');
-        bikeMarker.className = 'bike-marker';
-        new mapboxgl.Marker(bikeMarker).setLngLat([bike.position.lng, bike.position.lat]).addTo(this.map);
-      })
+    _drawBikes = bikes => {
+      const features = bikes.map(bike => ({
+        "type": "Feature",
+        "properties": {
+          "id": bike.address,
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [bike.position.lng, bike.position.lat],
+        }
+      }));
+
+      this.map.addSource("bikes", featureCollection(features));
+
+      this.map.loadImage(Bike, (error, image) => {
+        if (error) throw error;
+        this.map.addImage('bike', image);
+
+        this.map.addLayer({
+          "id": "bike-points",
+          "type": "symbol",
+          "source": "bikes",
+          "layout": {
+            "icon-image": "bike",
+            "icon-size": 0.25,
+          },
+        });
+      });
     }
 
     _toggleLoader = () => {
@@ -230,6 +275,48 @@
       height: 40px;
       cursor: pointer;
     }
+    #legend {
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: black;
+    font-weight: 500;
+    width: 90px;
+    font-size: 10px;
+    padding: 5px;
+    height: 60px;
+    border-radius: 5px;
+    border: 1px solid #3CB3EA;
+
+    }
+    #legend li {
+      list-style-type: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #legend ul {
+      padding-left: 0px;
+    }
+
+    #marker-bike {
+      height: 5px;
+      width: 20px;
+      background-color: #020887;
+    }
+
+    #marker-bus {
+      height: 5px;
+      width: 20px;
+      background-color: #A4B0F5;
+    }
+
+    #marker-walking {
+      height: 5px;
+      width: 20px;
+      background-color: #19ddff;
+    }
 
     .hidden#loader {
       display: none;
@@ -242,7 +329,7 @@
       height: 25px;
       cursor: pointer;
     }
-    
+
     #loader {
       display: flex;
       width: 100vw;
